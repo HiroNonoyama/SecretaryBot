@@ -62,5 +62,5 @@ class MessageHandler:
             "etc": {"method": "etc", "user_id": self.user_id}
         }
 
-        print switch[self.method]
+        return switch[self.method]
 
