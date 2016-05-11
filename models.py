@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
-from secretary import db
+from app import db
 
 
 class Todo(db.Document):
