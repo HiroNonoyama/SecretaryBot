@@ -7,6 +7,7 @@ celery = Celery('TodoTask')
 celery.config_from_object(celeryconfig)
 
 
+# データ処理は全てここで行う
 class TodoTask(object):
     def __init__(self):
         pass
