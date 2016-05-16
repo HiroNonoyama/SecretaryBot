@@ -28,12 +28,12 @@ class TodoTask(object):
         #友達登録 / テキストのメッセージを受信 / それ以外　で分類
  
         #友達登録時
-        if req["eventType"] == "138311609100106403" && req["content"]["opType"] == 4 :
+        if req["eventType"] == "138311609100106403" and req["content"]["opType"] == 4 :
             text = u"友達登録ありがとうございます。あなただけの秘書です。"
             send_text(req['from'], text)
 
         #受信したテキストメッセージを json_parse に流す
-        elif req["eventType"] == "138311609000106303" && req["content"]["contentType"] == 1:
+        elif req["eventType"] == "138311609000106303" and req["content"]["contentType"] == 1:
             messages = req["content"]["text"]
             user_id = req["content"]["from"]
             handler = MessageHandler(message,user_id)
