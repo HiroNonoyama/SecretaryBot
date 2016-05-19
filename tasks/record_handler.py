@@ -31,12 +31,14 @@ class TodoTask(object):
         if req["eventType"] == "138311609100106403" and req["content"]["opType"] == 4 :
             text = u"友達登録ありがとうございます。あなただけの秘書です。"
             send_text(req['from'], text)
+            return
 
         #受信したテキストメッセージを json_parse に流す
         elif req["eventType"] == "138311609000106303" and req["content"]["contentType"] == 1:
             messages = req["content"]["text"]
             user_id = req["content"]["from"]
             handler = MessageHandler(message,user_id)
+            return
 
         #それ以外（画像等 or Block）
         #Blockの時、無駄な反応しちゃうけどそれでいのー？
@@ -44,8 +46,9 @@ class TodoTask(object):
             text = u"ごめんね、文字じゃないと分からないの。 '登録'・'削除'・'表示'のどれかを入力してちょーだい。"
             to = [req["content"]["from"]]
             send_text(to,text)
+            return
 
-        return 'task {0}'.format(data)
+        return 
 
     @celery.task(filter=task_method, name='TodoTask.create')
     def create(self, obj_cls, **kwargs):
