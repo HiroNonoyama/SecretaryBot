@@ -16,7 +16,7 @@ class BotView(MethodView):
     def post(self):
         req = request.json
     	task = TodoTask()
-    	task.call(Todo, req)
+    	task.call.delay(Todo, req)
 
         return Response(status=200)
 
