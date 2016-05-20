@@ -15,6 +15,18 @@ HEADERS = {
     "X-Line-ChannelSecret": "781410f0c7180dd6c7cdd609dc673746", #channel secret
     "X-Line-Trusted-User-With-ACL": "u5a4a644eb5f3dec17bffa4c007fe5603" #channel mid
 }
+EVENTTYPE = {
+    "message" : "138311609100106303",
+    "other" : "138311609100106403",
+}
+CONTENTTYPE = {
+    "text" : 1,
+    "image" : 2,
+    "video" : 3,
+    "audio" : 4,
+    "location" : 7,
+    "sticker" : 8,
+}
 
 class TodoTask(object):
     def __init__(self):
@@ -28,16 +40,19 @@ class TodoTask(object):
         #友達登録 / テキストのメッセージを受信 / それ以外　で分類
  
         #友達登録時
-        if req["eventType"] == "138311609100106403" and req["content"]["opType"] == 4 :
+        if req["eventType"] == EVENTTYPE["other"] and req["content"]["opType"] == 4 :
             text = u"友達登録ありがとうございます。あなただけの秘書です。"
-            send_text(req['from'], text)
+            to = req["from"]
+            send(to, CONTENTTYPE["text"],text=text)
+            
             return
 
         #受信したテキストメッセージを json_parse に流す
-        elif req["eventType"] == "138311609000106303" and req["content"]["contentType"] == 1:
+        elif req["eventType"] == EVENTTYPE["message"] and req["content"]["contentType"] == 1:
             messages = req["content"]["text"]
             user_id = req["content"]["from"]
             handler = MessageHandler(message,user_id)
+            
             return
 
         #それ以外（画像等 or Block）
@@ -45,36 +60,39 @@ class TodoTask(object):
         else :
             text = u"ごめんね、文字じゃないと分からないの。 '登録'・'削除'・'表示'のどれかを入力してちょーだい。"
             to = [req["content"]["from"]]
-            send_text(to,text)
+            send(to,CONTENTTYPE["text"],text=text)
+            
             return
 
         return 
 
     @celery.task(filter=task_method, name='TodoTask.create')
     def create(self, obj_cls, **kwargs):
-        todo = obj_cls.objects.create(**kwargs)
+        todo = obj_cls.objects.create(kwargs)
 
         return todo.title
 
-    # added by : Kan
-    # ユーザーにtextメッセージを送る時の処理
-    def send_text(to, text):
-        content = {
-            "contentType": 1,
-            "toType": 1,
-            "text": text
-        }
-        events(to, content)
-
     #added by : Kan
-    def events(to, content):
+    #contentTypeを呼び出すときは上述の定数CONTENTYPEを使う
+    def send(to, contentType, **kwargs):
         app.logger.info(content)
         data = {
             "to": to,
             "toChannel": "1383378250",
             "eventType": "138311608800106203",
-            "content": content
+            "content": format_content(contentType, kwargs),
         }
 
         r = requests.post(LINE_ENDPOINT + "/v1/events", json=data, headers=HEADERS)
         app.logger.info(r.text)
+
+
+    # added by : Kan
+    # ユーザーにtextメッセージを送る時の処理
+    def format_content(contentType, properties):
+        content = {
+            "contentType": contentType,
+            "toType": 1, #Fixed value
+        }.update(properties)
+        return content
+
