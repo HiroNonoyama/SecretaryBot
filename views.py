@@ -15,9 +15,9 @@ class BotView(MethodView):
 
     def post(self):
         req = request.json
-        # print req['result'][0]
+    	task = TodoTask()
+    	task.call.delay(Todo, req)
 
         return Response(status=200)
 
 todos.add_url_rule('/', view_func=BotView.as_view('list'))
-
